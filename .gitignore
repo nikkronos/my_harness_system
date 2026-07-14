@@ -1,0 +1,32 @@
+# ── Секреты (НИКОГДА не коммитить) ──
+.env
+*.env
+env_vars.txt
+secrets/
+credentials*
+*.key
+*.pem
+*token*
+*.session
+
+# ── Приватная база знаний (если заведёшь) ──
+KB/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# ── Данные / БД / логи ──
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# ── ОС / редакторы ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
