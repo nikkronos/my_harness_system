@@ -44,7 +44,8 @@
 
 ```text
 <рабочая область>/
-├── CLAUDE.md          # этот файл — вход
+├── CLAUDE.md          # этот файл — вход для Claude Code
+├── AGENTS.md          # вход для Codex и др.; правишь этот файл — сверь и тот
 ├── .githooks/         # secret-guard: замок против коммита секретов
 ├── .claude/commands/  # /start (вход в сессию), /finish (запись состояния)
 ├── Main_docs/         # PROFILE (кто), RULES (как), PROJECTS (где),
