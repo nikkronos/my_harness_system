@@ -9,8 +9,11 @@ credentials*
 *token*
 *.session
 
-# ── Приватная база знаний (если заведёшь) ──
+# ── Приватная база знаний ──
 KB/
+
+# ── Локальные настройки Claude Code (команды в .claude/commands нужны, они остаются) ──
+.claude/settings.local.json
 
 # ── Python ──
 __pycache__/
