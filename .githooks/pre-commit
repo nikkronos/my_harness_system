@@ -1,0 +1,44 @@
+#!/bin/sh
+# secret-guard — pre-commit хук: не даёт закоммитить секреты.
+#
+# Проверяет две вещи:
+#   1) секретные файлы по имени (.env, ключи, session-файлы);
+#   2) секретное содержимое внутри ЛЮБОГО файла (токен, вписанный в код).
+#
+# Второе .gitignore не умеет — в этом смысл хука.
+# Включается командой: git config core.hooksPath .githooks
+# Осознанный обход в исключительном случае: git commit --no-verify
+fail=0
+
+# 1) секретные файлы по имени (allow-list шаблонов идёт первым)
+hits=$(git diff --cached --name-only --diff-filter=AM | while IFS= read -r f; do
+  base=${f##*/}
+  case "$base" in
+    .env.example|.env.sample|.env.template|.env.dist) ;;
+    .env|.env.*|env_vars.txt|*.session|*.session-journal|*.key|*.pem|*.pfx|*.p12|id_rsa|id_dsa|id_ecdsa|id_ed25519|*credentials*.json)
+      printf '%s\n' "$f" ;;
+  esac
+done)
+if [ -n "$hits" ]; then
+  echo "✖ secret-guard: секретные файлы в staged:" >&2
+  printf '%s\n' "$hits" | sed 's/^/   - /' >&2
+  fail=1
+fi
+
+# 2) высокосигнальный секрет в ДОБАВЛЕННЫХ строках
+added=$(git diff --cached -U0 --diff-filter=AM | grep '^+' | grep -v '^+++')
+check() { printf '%s\n' "$added" | grep -Eq -- "$1" && { echo "✖ secret-guard: $2" >&2; fail=1; }; }
+check '-----BEGIN [A-Z ]*PRIVATE KEY-----' 'приватный ключ в контенте'
+check '[0-9]{8,10}:[A-Za-z0-9_-]{35}'       'токен Telegram-бота в контенте'
+check 'sk-[A-Za-z0-9_-]{20,}'                'API-ключ sk-... в контенте'
+check 'AKIA[0-9A-Z]{16}'                     'AWS access key в контенте'
+
+# 3) chain к собственному pre-commit репозитория, если он есть (не терять существующие)
+repo_hook="$(git rev-parse --git-dir)/hooks/pre-commit"
+[ -x "$repo_hook" ] && { "$repo_hook" "$@" || exit $?; }
+
+if [ "$fail" -ne 0 ]; then
+  echo "→ убери секрет из staged, либо осознанно: git commit --no-verify" >&2
+  exit 1
+fi
+exit 0

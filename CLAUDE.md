@@ -40,7 +40,9 @@
 ```text
 <рабочая область>/
 ├── CLAUDE.md          # этот файл — вход
-├── Main_docs/         # PROFILE (кто), RULES (как), PROJECTS (где)
+├── .githooks/         # secret-guard: замок против коммита секретов
+├── Main_docs/         # PROFILE (кто), RULES (как), PROJECTS (где),
+│                      # AGENT_PROMPTS (готовые prompts)
 └── Projects/          # твои проекты   <— заведи по необходимости —>
 ```
 
@@ -55,7 +57,9 @@ git status
 git remote -v
 ```
 
-Секреты (`.env`, токены, ключи, session-файлы) — **не коммитить** (защита в `.gitignore`).
+Секреты (`.env`, токены, ключи, session-файлы) — **не коммитить**. Защита в два
+слоя: `.gitignore` прячет файлы по имени, хук `secret-guard` проверяет содержимое
+коммита и блокирует его при находке. Подробно — `Main_docs/RULES.md`.
 
 ## Завершение
 
