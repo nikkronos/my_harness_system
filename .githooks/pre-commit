@@ -30,7 +30,10 @@ added=$(git diff --cached -U0 --diff-filter=AM | grep '^+' | grep -v '^+++')
 check() { printf '%s\n' "$added" | grep -Eq -- "$1" && { echo "✖ secret-guard: $2" >&2; fail=1; }; }
 check '-----BEGIN [A-Z ]*PRIVATE KEY-----' 'приватный ключ в контенте'
 check '[0-9]{8,10}:[A-Za-z0-9_-]{35}'       'токен Telegram-бота в контенте'
-check 'sk-[A-Za-z0-9_-]{20,}'                'API-ключ sk-... в контенте'
+# Граница перед sk- обязательна: без неё любое kebab-слово, кончающееся
+# на «...sk-», читается как ключ («risk-...», «disk-...») и хук кричит ложно.
+# Дефис в границу включён намеренно, чтобы `foo-sk-ant-api03-…` всё ещё ловился.
+check '(^|[^A-Za-z0-9_])sk-[A-Za-z0-9_-]{20,}' 'API-ключ sk-... в контенте'
 check 'AKIA[0-9A-Z]{16}'                     'AWS access key в контенте'
 
 # 3) chain к собственному pre-commit репозитория, если он есть (не терять существующие)
